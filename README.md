@@ -53,11 +53,11 @@ data
 We provide a [pre-trained ckpt](https://drive.google.com/file/d/17Dj0tjd29lPGOGYEF5IrE8aPClXUjTrR/view?usp=drive_link) of our full model, which has similar quantitative result as presented in the paper. 
 | FSC val MAE | FSC val RMSE | FSC test MAE |  FSC test RMSE | CARPK MAE | CARPK RMSE |
 |-------------|--------------|--------------|----------------|-----------|------------|
-| 18.93       | 66.10        | 17.45        | 104.88         | 11.70     | 13.94      |
+| 13.78       | 58.78        | 11.76        | 97.86          | 8.61      | 13.47      |
 
-| Part-A MAE | Part-A RMSE | Part-B MAE | Part-B RMSE |
-|------------|-------------|------------|-------------|
-| 197.47     | 319.75      | 47.92      | 80.48       |
+| FSC S-v2 MAE | FSC S-v2 MSE | 
+|--------------|--------------|
+| 197.47       | 319.75       |
 
 ---
 ## Gallery
