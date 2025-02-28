@@ -61,7 +61,7 @@ We provide a [pre-trained ckpt](https://drive.google.com/file/d/17Dj0tjd29lPGOGY
 
 ---
 ## Gallery
-![more](asset/qual.png)
+![more](asset/visualization.jpg)
 
 ## Citation
 Consider cite us if you find our paper is useful in your research :).
