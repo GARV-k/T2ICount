@@ -2,7 +2,7 @@
 ## [Paper (ArXiv)](https://arxiv.org/abs/) 
 
 
-![teaser](assets/teaser.pdf)
+![teaser](asset/teaser.jpg)
 
 Official Implementation for CVPR 2025 paper T2ICount: Enhancing Cross-modal Understanding for Zero-Shot Counting.
 
