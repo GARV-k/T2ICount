@@ -44,8 +44,7 @@ data
 │  ├─part_B/
 ```
 ## FSC-147-S-v2
-
-
+During the review process, the reviewers raised concerns regarding the dataset. In response, we conducted a thorough reassessment and introduced a revised version, which we named FSC-147-S-v2. This updated version includes an additional set of images, bringing the total to 240. As a result, the statistics of v2 differ from those originally reported in the paper. The results from the baseline methods and our method are provided here. For the updated dataset (v2), please refer to **FSC-147-S.json**. As for the original dataset used in the paper, you can download it here. We sincerely apologize for any confusion caused.
 ## Run the Code
 **Train**. 
 
