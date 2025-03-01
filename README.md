@@ -49,7 +49,7 @@ During the review process, the reviewers raised concerns regarding the dataset. 
 | Medthod     |      MAE     |     RMSE     | 
 |-------------|--------------|--------------|
 | CLIP-Count  |    58.78     |    11.76     | 
-| CountX      |    58.78     |    11.76     | 
+| CountX      |    28.67     |    89.18     | 
 | VLCounter   |    58.78     |    11.76     | 
 | PseCo       |    58.78     |    11.76     | 
 | DAVE        |    58.78     |    11.76     | 
