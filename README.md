@@ -52,7 +52,7 @@ During the review process, the reviewers raised concerns regarding the dataset. 
 | CountX      |    28.67     |    89.18     | 
 | VLCounter   |    33.10     |    69.34     | 
 | PseCo       |    58.78     |    11.76     | 
-| DAVE        |    58.78     |    11.76     | 
+| DAVE        |    46.36     |    97.11     | 
 | T2ICount (Ours)    |    5.99     |    10.55     | 
 
 We hope that this small subset can serve as an evaluation set to verify whether a model is truly performing zero-shot object counting.
