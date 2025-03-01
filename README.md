@@ -55,7 +55,7 @@ During the review process, the reviewers raised concerns regarding the dataset. 
 | DAVE        |    58.78     |    11.76     | 
 | T2ICount (Ours)    |    5.99     |    10.55     | 
 
-We hope that this small subset can serve as a evaluation set to verify whether a model is truly performing zero-shot object counting.
+We hope that this small subset can serve as an evaluation set to verify whether a model is truly performing zero-shot object counting.
 
 ## Run the Code
 **Train**. 
