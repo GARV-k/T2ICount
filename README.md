@@ -50,7 +50,7 @@ During the review process, the reviewers raised concerns regarding the dataset. 
 |-------------|--------------|--------------|
 | CLIP-Count  |    58.78     |    11.76     | 
 | CountX      |    28.67     |    89.18     | 
-| VLCounter   |    58.78     |    11.76     | 
+| VLCounter   |    33.10     |    69.34     | 
 | PseCo       |    58.78     |    11.76     | 
 | DAVE        |    58.78     |    11.76     | 
 | T2ICount (Ours)    |    5.99     |    10.55     | 
