@@ -53,7 +53,7 @@ During the review process, the reviewers raised concerns regarding the dataset. 
 | VLCounter   |    58.78     |    11.76     | 
 | PseCo       |    58.78     |    11.76     | 
 | DAVE        |    58.78     |    11.76     | 
-| T2ICount    |    58.78     |    11.76     | 
+| T2ICount (Ours)    |    58.78     |    11.76     | 
 
 
 
