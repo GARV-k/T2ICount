@@ -10,14 +10,7 @@ Official Implementation for CVPR 2025 paper T2ICount: Enhancing Cross-modal Unde
 
 **Environment:** Create a virtural environment use Anaconda, and install all dependencies.
 ```
-conda create -n clipcount python=3.8 -y;
-conda activate clipcount;
-conda install pytorch==1.10.0 torchvision==0.11.0 torchaudio==0.10.0 cudatoolkit=10.2 -c pytorch
-# For GPU with CUDA version 11.x, please use:
-# conda install pytorch==1.10.0 torchvision==0.11.0 torchaudio==0.10.0 cudatoolkit=11.3 -c pytorch -c conda-forge
-pip install -r requirements.txt
-pip install ftfy regex tqdm
-pip install git+https://github.com/openai/CLIP.git
+conda env create -f environment.yaml
 ```
 **Data:** We conduct experiments over three datasets, you can download and use whichever you would like to test.
 The three dataset could be downloaded at: [FSC-147](https://github.com/cvlab-stonybrook/LearningToCountEverything) | [CARPK](https://lafi.github.io/LPN/).
