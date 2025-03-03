@@ -70,7 +70,7 @@ We provide a [pre-trained ckpt](https://drive.google.com/file/d/17Dj0tjd29lPGOGY
 
 | FSC S-v2 MAE | FSC S-v2 MSE | 
 |--------------|--------------|
-| 197.47       | 319.75       |
+| 5.99       | 10.55        |
 
 ---
 ## Gallery
