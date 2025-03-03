@@ -31,7 +31,7 @@ data
 │  │  ├─ImageClasses_FSC147.txt
 │  │  ├─Train_Test_Val_FSC_147.json
 │  │  ├─ annotation_FSC147_384.json
-│  
+
 
 ```
 ## FSC-147-S-v2
