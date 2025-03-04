@@ -16,7 +16,7 @@ conda env create -f environment.yaml
 The three dataset could be downloaded at: [FSC-147](https://github.com/cvlab-stonybrook/LearningToCountEverything) | [CARPK](https://lafi.github.io/LPN/).
 Notice that you have to download the annoations of FSC-147 separately from [their repo](https://github.com/cvlab-stonybrook/LearningToCountEverything/tree/master/data).
 
-Extract and put the downloaded data in the `data/` dir. The complete file structure should look like this. You don't have to download all the dataset for evaluation, but you must have FSC-147 if you want to train the model.
+Extract and put the downloaded data in the `data/` dir. The complete file structure should look like this. You don't have to download all the dataset for evaluation, but you must have FSC-147 if you want to train the model. 
 ```
 data
 ├─CARPK/
@@ -33,6 +33,8 @@ data
 │  │  ├─ annotation_FSC147_384.json
 ```
 **Stable Diffusion:** Our model is developed by fine-tuning Stable Diffusion v1.5, whose original weights can be downloaded from [here](https://huggingface.co/stable-diffusion-v1-5/stable-diffusion-v1-5/blob/main/v1-5-pruned-emaonly.ckpt).
+Please put the downloaded weight file in the `configs/` dir.
+
 ## FSC-147-S-v2
 During the review process, the reviewers raised concerns regarding the dataset. In response, we conducted a thorough reassessment and introduced a revised version, which we named FSC-147-S-v2. This updated version includes an additional set of images, bringing the total to 230. As a result, the statistics of v2 differ from those originally reported in the paper. In this new subset, the objects originally annotated in these images from FSC-147 had an average count of 44.98, while the newly annotated objects have an average count of 3.96. The results from the baseline methods and our method are provided here. For the updated dataset (v2), please refer to [**FSC-147-S.json**](https://github.com/cha15yq/T2ICount/blob/main/FSC-147-S.json). As for the original subset used in the paper, you can download it [here](https://github.com/cha15yq/T2ICount/blob/main/asset/FSC-147-S-v1.json). We sincerely apologize for any confusion caused.
 
