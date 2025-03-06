@@ -71,11 +71,14 @@ We provide a [pre-trained ckpt](https://drive.google.com/file/d/1lw5LgpYP7vTazaM
 ## Citation
 Consider cite us if you find our paper is useful in your research :).
 ```
-@article{jiang2023clip,
-  title={CLIP-Count: Towards Text-Guided Zero-Shot Object Counting},
-  author={Jiang, Ruixiang and Liu, Lingbo and Chen, Changwen},
-  journal={arXiv preprint arXiv:2305.07304},
-  year={2023}
+@misc{qian2025t2icount,
+      title={T2ICount: Enhancing Cross-modal Understanding for Zero-Shot Counting}, 
+      author={Yifei Qian and Zhongliang Guo and Bowen Deng and Chun Tong Lei and Shuai Zhao and Chun Pong Lau and Xiaopeng Hong and Michael P. Pound},
+      year={2025},
+      eprint={2502.20625},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV},
+      url={https://arxiv.org/abs/2502.20625}, 
 }
 
 ```
