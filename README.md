@@ -50,8 +50,10 @@ During the review process, the reviewers raised concerns regarding the dataset. 
 We hope that this small subset can serve as an evaluation set to verify whether a model is truly performing zero-shot object counting.
 
 ## Run the Code
-**Train**. 
-
+**Train**. After you get the data and the pretrianed weight of SD1.5 prepared, you can train the model using the following command.
+```
+CUDA_VISIBLE_DEVICES=0 python test.py --model-path ./best_model_pater.pth --data fsc147(or carpk) --batch-size 16 --dataset_type FSC --ckpt path/to/model.ckpt
+```
 ---
 **Evaluation**. 
 
