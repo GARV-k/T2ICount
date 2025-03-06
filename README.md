@@ -71,7 +71,7 @@ We provide a [pre-trained ckpt](https://drive.google.com/file/d/1lw5LgpYP7vTazaM
 ## Citation
 Consider cite us if you find our paper is useful in your research :).
 ```
-@misc{qian2025t2icount,
+@article{qian2025t2icount,
       title={T2ICount: Enhancing Cross-modal Understanding for Zero-Shot Counting}, 
       author={Yifei Qian and Zhongliang Guo and Bowen Deng and Chun Tong Lei and Shuai Zhao and Chun Pong Lau and Xiaopeng Hong and Michael P. Pound},
       year={2025},
