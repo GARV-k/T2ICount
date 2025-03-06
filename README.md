@@ -63,7 +63,9 @@ We provide a [pre-trained ckpt](https://drive.google.com/file/d/1lw5LgpYP7vTazaM
 | FSC S-v2 MAE | FSC S-v2 MSE | 
 |--------------|--------------|
 | 5.99       | 10.55        |
-
+```
+CUDA_VISIBLE_DEVICES=0 python test.py --model-path ./best_model_pater.pth --data fsc147(or carpk) --batch-size 16 --dataset_type FSC --ckpt path/to/model.ckpt
+```
 ---
 ## Gallery
 ![more](asset/visualization.jpg)
