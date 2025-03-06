@@ -52,7 +52,7 @@ We hope that this small subset can serve as an evaluation set to verify whether 
 ## Run the Code
 **Train**. Once you have prepared the data and the pretrained weights of SD1.5, you can train the model using the following command.
 ```
-CUDA_VISIBLE_DEVICES=0 python train.py --model-path ./best_model_pater.pth --data fsc147(or carpk) --batch-size 16 --dataset_type FSC --ckpt path/to/model.ckpt
+CUDA_VISIBLE_DEVICES=0 python train.py --content exp --crop-size 384 --concat-size 224 --data-dir data/FSC --batch-size 16 --lr 5e-5 --weight-decay 1e-4
 ```
 ---
 **Evaluation**. 
