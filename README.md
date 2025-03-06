@@ -75,10 +75,7 @@ Consider cite us if you find our paper is useful in your research :).
       title={T2ICount: Enhancing Cross-modal Understanding for Zero-Shot Counting}, 
       author={Yifei Qian and Zhongliang Guo and Bowen Deng and Chun Tong Lei and Shuai Zhao and Chun Pong Lau and Xiaopeng Hong and Michael P. Pound},
       year={2025},
-      eprint={2502.20625},
       archivePrefix={arXiv},
-      primaryClass={cs.CV},
-      url={https://arxiv.org/abs/2502.20625}, 
 }
 
 ```
