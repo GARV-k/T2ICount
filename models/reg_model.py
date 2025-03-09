@@ -76,7 +76,6 @@ class Count(nn.Module):
         attn48 = (attn48 * prompt_attn_mask).sum(dim=1, keepdims=True) / prompt_attn_mask.sum(dim=1, keepdims=True)
 
         fused_attn = 0.1 * minmax_norm(attn48) + 0.3 * minmax_norm(attn24) + 0.6 * minmax_norm(attn12)
-        # fused_attn = minmax_norm(fused_attn)
         text_feat = (text_feat * prompt_attn_mask.squeeze(3)).sum(dim=1) / prompt_attn_mask.squeeze(3).sum(dim=1) # B, 768
         den_map, sim_x2, sim_x1 = self.decoder(img_feat, text_feat)
         return den_map, sim_x2, sim_x1, fused_attn.float().detach()
