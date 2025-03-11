@@ -1,5 +1,5 @@
 import torch
-
+import torch.nn.functional as F
 
 def extract_patches(img, patch_size=512, stride=512):
     _, _, h, w = img.size()
