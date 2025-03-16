@@ -71,7 +71,6 @@ CUDA_VISIBLE_DEVICES=0 python test.py --model-path ./best_model_pater.pth --data
 ---
 ## Gallery
 ![more](asset/visualization.jpg)
-Sometimes, the similarity map may look poor, but when you visualize the fused attention map, you can see that the loss is still effective on it!
 ## Citation
 Consider cite us if you find our paper is useful in your research :).
 ```
