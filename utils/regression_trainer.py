@@ -124,8 +124,7 @@ class Reg_Trainer(Trainer):
                 N = inputs.shape[0]
                 pred_den, sim_x2, sim_x1, fused_cross_attn = self.model(inputs, caption, gt_prompt_attn_mask)
                 fused_cross_attn_ = fused_cross_attn * gt_img_attn_mask
-                #attn_score = fused_cross_attn_.flatten(1).sum(dim=1, keepdims=True) / (gt_img_attn_mask.flatten(1).sum(dim=1, keepdims=True) + 1e-7)
-                AN = fused_cross_attn_ >= 0.3 #attn_score.unsqueeze(2).unsqueeze(3)
+                AN = fused_cross_attn_ >= 0.3 
                 reg_loss = get_reg_loss(pred_den, gt_den_maps, threshold=1e-3 * 60)
                 P = gt_den_maps >= (1e-3 * 60)
                 rrc_loss_stage1 = RRC_loss(sim_x2, AN, P)
