@@ -197,41 +197,7 @@ class Reg_Trainer(Trainer):
             self.best_mse = mse
             torch.save(model_state_dict, os.path.join(self.save_dir, 'best_model_{}.pth'.format(self.epoch)))
             logging.info("Save best model: MAE: {:.2f} MSE:{:.2f} model epoch {}".format(mae, mse, self.epoch))
-            self.test_epoch()
-        elif mae < 14:
-            torch.save(model_state_dict, os.path.join(self.save_dir, 'model_{}.pth'.format(self.epoch)))
-            self.test_epoch()
         print("Best Result: MAE: {:.2f} MSE:{:.2f}".format(self.best_mae, self.best_mse))
-
-
-    def test_epoch(self):
-        epoch_start = time.time()
-        self.model.set_eval()
-        epoch_res = []
-        for inputs, gt_counts, captions, attn_mask, name in self.dataloaders['test']:
-            inputs = inputs.to(self.device)
-            gt_attn_mask = attn_mask.to(self.device).unsqueeze(2).unsqueeze(3)
-            cropped_imgs, num_h, num_w = extract_patches(inputs, patch_size=self.args.crop_size,
-                                                         stride=self.args.stride)
-            outputs = []
-            with torch.set_grad_enabled(False):
-                num_chunks = (cropped_imgs.size(0) + self.args.batch_size - 1) // self.args.batch_size
-                for i in range(num_chunks):
-                    start_idx = i * self.args.batch_size
-                    end_idx = min((i + 1) * self.args.batch_size, cropped_imgs.size(0))
-                    outputs_partial = self.model(cropped_imgs[start_idx:end_idx], captions * (end_idx - start_idx), gt_attn_mask.repeat((end_idx - start_idx), 1, 1, 1))[0]
-                    outputs.append(outputs_partial)
-                results = reassemble_patches(torch.cat(outputs, dim=0), num_h, num_w, inputs.size(2), inputs.size(3),
-                                             patch_size=self.args.crop_size, stride=self.args.stride)
-                res = gt_counts[0].item() - torch.sum(results).item() / 60
-                epoch_res.append(res)
-
-        epoch_res = np.array(epoch_res)
-        mse = np.sqrt(np.mean(np.square(epoch_res)))
-        mae = np.mean(np.abs(epoch_res))
-
-        logging.info('Epoch {} Test, MAE: {:.2f}, MSE: {:.2f} Cost {:.1f} sec'
-                     .format(self.epoch, mae, mse, (time.time() - epoch_start)))
 
 
 
