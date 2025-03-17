@@ -76,7 +76,7 @@ Consider cite us if you find our paper is useful in your research :).
 ```
 @inproceedings{qian2025t2icount,
                title={T2ICount: Enhancing Cross-modal Understanding for Zero-Shot Counting}, 
-               author={Yifei Qian and Zhongliang Guo and Bowen Deng and Chun Tong Lei and Shuai Zhao and Chun Pong Lau and Xiaopeng Hong and Michael P. Pound},
+               author={Qian, Yifei and Guo, Zhongliang and Deng, Bowen and Lei, Chun Tong and Zhao, Shuai and Lau, Chun Pong and Hong, Xiaopeng and Pound, Michael P},
                year={2025},
                booktitle={Proceedings of the IEEE/CVF conference on computer vision and pattern recognition}
 }
