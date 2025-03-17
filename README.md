@@ -80,5 +80,4 @@ Consider cite us if you find our paper is useful in your research :).
                year={2025},
                booktitle={Proceedings of the IEEE/CVF conference on computer vision and pattern recognition}
 }
-
 ```
