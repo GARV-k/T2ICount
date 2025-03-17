@@ -74,11 +74,11 @@ CUDA_VISIBLE_DEVICES=0 python test.py --model-path ./best_model_paper.pth --data
 ## Citation
 Consider cite us if you find our paper is useful in your research :).
 ```
-@article{qian2025t2icount,
-      title={T2ICount: Enhancing Cross-modal Understanding for Zero-Shot Counting}, 
-      author={Yifei Qian and Zhongliang Guo and Bowen Deng and Chun Tong Lei and Shuai Zhao and Chun Pong Lau and Xiaopeng Hong and Michael P. Pound},
-      year={2025},
-      archivePrefix={arXiv},
+@inproceedings{qian2025t2icount,
+               title={T2ICount: Enhancing Cross-modal Understanding for Zero-Shot Counting}, 
+               author={Yifei Qian and Zhongliang Guo and Bowen Deng and Chun Tong Lei and Shuai Zhao and Chun Pong Lau and Xiaopeng Hong and Michael P. Pound},
+               year={2025},
+               booktitle={Proceedings of the IEEE/CVF conference on computer vision and pattern recognition}
 }
 
 ```
