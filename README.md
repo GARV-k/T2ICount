@@ -46,7 +46,7 @@ During the review process, the reviewers raised concerns regarding the dataset. 
 | T2ICount (Ours)    |    5.99     |    10.55     | 
 
 We hope that this small subset can serve as an evaluation set to verify whether a model is truly performing zero-shot object counting.
-
+---
 ## Train
 Once you have prepared the data and the pretrained weights of SD1.5, you can train the model using the following command. 
 
