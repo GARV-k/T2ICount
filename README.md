@@ -55,7 +55,7 @@ We hope that this small subset can serve as an evaluation set to verify whether 
 CUDA_VISIBLE_DEVICES=0 python train.py --content exp --crop-size 384 --concat-size 224 --data-dir data/FSC --batch-size 16 --lr 5e-5 --weight-decay 1e-4
 ```
 ---
-**Evaluation**. 
+**Evaluation and the pretrained model**. 
 
 We provide a [pre-trained ckpt](https://drive.google.com/file/d/1lw5LgpYP7vTazaMWTgNa6nFoZ63j-st9/view?usp=sharing) of our full model, which has similar quantitative result as presented in the paper. 
 | FSC val MAE | FSC val RMSE | FSC test MAE |  FSC test RMSE | CARPK MAE | CARPK RMSE |
