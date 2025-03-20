@@ -50,15 +50,14 @@ with torch.set_grad_enabled(False):
     for i in range(num_chunks):
         start_idx = i * 4
         end_idx = min((i + 1) * 4, cropped_imgs.size(0))
-        print(end_idx)
         outputs_partial, sim_x1, sim_x2, _ = model(cropped_imgs[start_idx:end_idx], cls_name * (end_idx - start_idx),
                                 attention_mask.repeat((end_idx - start_idx), 1, 1, 1))
         outputs.append(outputs_partial)
 
     results = reassemble_patches(torch.cat(outputs, dim=0), num_h, num_w, im.size(2), im.size(3),
                                      patch_size=384, stride=384).detach().cpu().squeeze(0).squeeze(0) / 60
-    
     pred_density = results.numpy()
+    print('Predicted Number:', pred_density.sum())
     pred_density = pred_density / pred_density.max()
     pred_density_write = 1. - pred_density
     pred_density_write = cv2.applyColorMap(np.uint8(255 * pred_density_write), cv2.COLORMAP_JET)
