@@ -58,7 +58,7 @@ CUDA_VISIBLE_DEVICES=0 python train.py --content exp --crop-size 384 --concat-si
 ---
 ## Evaluation and the pretrained model
 
-We provide a [pre-trained ckpt](https://drive.google.com/file/d/1lw5LgpYP7vTazaMWTgNa6nFoZ63j-st9/view?usp=sharing) of our full model, which has similar quantitative result as presented in the paper. 
+We provide a [pre-trained ckpt](https://drive.google.com/file/d/1lw5LgpYP7vTazaMWTgNa6nFoZ63j-st9/view?usp=sharing) of our full model, which is the exact model used to demonstrate the performance results presented in the paper.
 | FSC val MAE | FSC val RMSE | FSC test MAE |  FSC test RMSE | CARPK MAE | CARPK RMSE |
 |-------------|--------------|--------------|----------------|-----------|------------|
 | 13.78       | 58.78        | 11.76        | 97.86          | 8.61      | 13.47      |
