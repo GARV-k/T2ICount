@@ -50,8 +50,9 @@ We hope that this small subset can serve as an evaluation set to verify whether 
 ---
 ## Train
 Once you have prepared the data and the pretrained weights of SD1.5, you can train the model using the following command. 
+(Tips: You could try 1e-4 for learning rate if you couldn't get nice results with lr=5e-5.)
 
-(Tips: You could try 1e-4 for learning rate if you couldn't get nice results with lr=5e-5. We have tested the reproducibility of this code and obtained consistent results, the [training log](https://github.com/cha15yq/T2ICount/blob/main/logs/train.log) is provided along with the [reproduced model](https://drive.google.com/file/d/1VN5uI9F0XjKQ-JwjOpMYYJF5ku92znO_/view?usp=sharing).)
+We have tested the reproducibility of this code and obtained consistent results, the [training log](https://github.com/cha15yq/T2ICount/blob/main/logs/train.log) is provided along with the [reproduced model](https://drive.google.com/file/d/1VN5uI9F0XjKQ-JwjOpMYYJF5ku92znO_/view?usp=sharing).
 ```
 CUDA_VISIBLE_DEVICES=0 python train.py --content exp --crop-size 384 --concat-size 224 --data-dir data/FSC --batch-size 16 --lr 5e-5 --weight-decay 5e-5
 ```
