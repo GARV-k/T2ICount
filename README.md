@@ -1,4 +1,4 @@
-# T2ICount: Enhancing Cross-modal Understanding for Zero-Shot Counting
+# T2ICount: Enhancing Cross-modal Understanding for Zero-Shot Counting (CVPR2025)
 ## [Paper (ArXiv)](https://arxiv.org/abs/2502.20625) 
 
 Official Implementation for CVPR 2025 paper T2ICount: Enhancing Cross-modal Understanding for Zero-Shot Counting.
