@@ -17,11 +17,13 @@ dependencies:
     - pytorch-lightning==1.4.2
     - omegaconf==2.1.1
     - einops==0.3.0
+    - tokenizers==0.12.1
     - transformers==4.19.2
-    - kornia==0.6
-    - h5py
+    - kornia==0.6.5
+    - h5py==3.8.0
     - putz
-    - importlib-resources
+    - cython==0.29.36
+    - importlib-resources==5.12.0
     - torchmetrics==0.6.0
     - -e git+https://github.com/CompVis/taming-transformers.git@master#egg=taming-transformers
     - -e git+https://github.com/openai/CLIP.git@main#egg=clip
