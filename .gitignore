@@ -60,6 +60,7 @@ Thumbs.db
 *.tar.gz
 *.tar
 *.rar
+*.whl
 
 # Config files with sensitive information (if any)
 config.json
