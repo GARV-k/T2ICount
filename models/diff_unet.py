@@ -9,7 +9,7 @@ from torch import nn, einsum
 
 from einops import rearrange, repeat
 from transformers import CLIPTokenizer
-from transformers.models.clip.modeling_clip import CLIPTextConfig, CLIPTextModel, CLIPTextTransformer, _expand_mask
+from transformers.models.clip.modeling_clip import CLIPTextConfig, CLIPTextModel, CLIPTextTransformer
 from inspect import isfunction
 
 

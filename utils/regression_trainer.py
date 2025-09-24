@@ -1,5 +1,9 @@
-from torch.utils.data import DataLoader, default_collate
+from torch.utils.data import DataLoader
 import torch
+try:
+    from torch.utils.data import default_collate
+except ImportError:
+    from torch.utils.data.dataloader import default_collate
 import logging
 from utils.helper import SaveHandler, AverageMeter
 from utils.trainer import Trainer
