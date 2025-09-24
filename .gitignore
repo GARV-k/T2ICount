@@ -1,0 +1,66 @@
+# Data folders
+data/
+dataset/
+datasets/
+
+# Model files
+*.pt
+*.pth
+*.ckpt
+
+
+# Training logs and outputs
+logs/
+history/
+output/
+results/
+checkpoints/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# PyTorch
+*.pth.tar
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+
+# Large files that shouldn't be tracked
+*.zip
+*.tar.gz
+*.tar
+*.rar
+
+# Config files with sensitive information (if any)
+config.json
+secrets.json
