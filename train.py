@@ -52,6 +52,8 @@ def parse_arg():
                         help='the starting epoch for validation')
     parser.add_argument('--val-epoch', default=1, type=int,
                         help='the number of epoch between validation')
+    parser.add_argument('--num-gpus', default=0, type=int,
+                        help='number of GPUs to use (0 means use all available)')
 
     args = parser.parse_args()
     return args

@@ -17,6 +17,7 @@ import torch.nn.functional as F
 import torch.nn as nn
 from utils.ssim_loss import cal_avg_ms_ssim
 from utils.tools import extract_patches, reassemble_patches
+from tqdm import tqdm
 
 
 def setup_seed(seed):
@@ -40,6 +41,7 @@ def train_collate(batch):
 class Reg_Trainer(Trainer):
     def setup(self):
         args = self.args
+        
         if args.seed != -1:
             setup_seed(args.seed)
             print('Random seed is set as {}'.format(args.seed))
@@ -47,7 +49,7 @@ class Reg_Trainer(Trainer):
             self.device = torch.device('cuda')
             torch.cuda.set_device(torch.cuda.current_device())
             self.device_count = torch.cuda.device_count()
-            assert self.device_count == 1
+            # Allow multi-GPU usage for model parallelism
             logging.info('Using {} gpus'.format(self.device_count))
         else:
             raise Exception('GPU is not available')
@@ -69,12 +71,11 @@ class Reg_Trainer(Trainer):
                                           pin_memory=(True if x == 'train' else False))
                             for x in ['train', 'val', 'test']}
 
-
         self.model = Count(args.config, args.sd_path,
                            unet_config={'base_size': self.args.crop_size,
                                         'max_attn_size': self.args.crop_size // self.d_ratio,
                                         'attn_selector': 'down_cross+up_cross'})
-        self.model.to(self.device)
+        # Model submodules are already distributed across GPUs
 
         self.optimizer = torch.optim.AdamW([
             {'params': self.model.unet.parameters(),
@@ -102,12 +103,27 @@ class Reg_Trainer(Trainer):
 
     def train(self):
         args = self.args
-        for epoch in range(self.start_epoch, args.epochs):
+        # Create overall training progress bar
+        epoch_pbar = tqdm(range(self.start_epoch, args.epochs), 
+                         desc="Training Progress", 
+                         position=0, 
+                         leave=True,
+                         initial=self.start_epoch,
+                         total=args.epochs)
+        
+        for epoch in epoch_pbar:
             logging.info('-' * 50 + "Epoch:{}/{}".format(epoch, args.epochs - 1) + '-' * 50)
             self.epoch = epoch
+            
+            # Update epoch progress bar description
+            epoch_pbar.set_description(f"Epoch {epoch}/{args.epochs-1}")
+            
             self.train_epoch()
             if self.epoch >= args.start_val and self.epoch % self.args.val_epoch == 0:
                 self.val_epoch()
+        
+        epoch_pbar.close()
+
 
     def train_epoch(self):
         epoch_reg_loss = AverageMeter()
@@ -117,8 +133,17 @@ class Reg_Trainer(Trainer):
         epoch_mse = AverageMeter()
         epoch_start = time.time()
 
-        for step, (input, den_map, caption, prompt_attn_mask, img_attn_mask) in enumerate(
-                self.dataloaders['train']):
+        accumulation_steps = getattr(self.args, 'accumulation_steps', 1)  # Default to 4 if not set
+        self.optimizer.zero_grad()
+
+        # Create batch progress bar for this epoch
+        batch_pbar = tqdm(enumerate(self.dataloaders['train']), 
+                         desc=f"Epoch {self.epoch} Batches", 
+                         total=len(self.dataloaders['train']),
+                         position=1, 
+                         leave=False)
+
+        for step, (input, den_map, caption, prompt_attn_mask, img_attn_mask) in batch_pbar:
             inputs = input.to(self.device)
             gt_den_maps = den_map.to(self.device) * 60
             gt_prompt_attn_mask = prompt_attn_mask.to(self.device).unsqueeze(2).unsqueeze(3)
@@ -127,12 +152,12 @@ class Reg_Trainer(Trainer):
             with torch.set_grad_enabled(True):
                 N = inputs.shape[0]
                 pred_den, sim_x2, sim_x1, fused_cross_attn = self.model(inputs, caption, gt_prompt_attn_mask)
-                fused_cross_attn_ = fused_cross_attn * gt_img_attn_mask
+                fused_cross_attn_ = fused_cross_attn * gt_img_attn_mask.to(fused_cross_attn.device)
                 AN = fused_cross_attn_ >= 0.3 
-                reg_loss = get_reg_loss(pred_den, gt_den_maps, threshold=1e-3 * 60)
+                reg_loss = get_reg_loss(pred_den, gt_den_maps.to(pred_den.device), threshold=1e-3 * 60)
                 P = gt_den_maps >= (1e-3 * 60)
-                rrc_loss_stage1 = RRC_loss(sim_x2, AN, P)
-                rrc_loss_stage2 = RRC_loss(sim_x1, AN, P)
+                rrc_loss_stage1 = RRC_loss(sim_x2, AN.to(sim_x2.device), P.to(sim_x2.device))
+                rrc_loss_stage2 = RRC_loss(sim_x1, AN.to(sim_x1.device), P.to(sim_x1.device))
 
                 epoch_reg_loss.update(reg_loss.item(), N)
                 epoch_RRC1_loss.update(rrc_loss_stage1.item(), N)
@@ -145,16 +170,27 @@ class Reg_Trainer(Trainer):
                 epoch_mae.update(np.mean(np.abs(diff)).item(), N)
                 epoch_mse.update(np.mean(diff * diff), N)
 
-                self.optimizer.zero_grad()
-                loss.backward()
-                self.optimizer.step()
+                # Gradient accumulation
+                (loss / accumulation_steps).backward()
+                if (step + 1) % accumulation_steps == 0 or (step + 1) == len(self.dataloaders['train']):
+                    self.optimizer.step()
+                    self.optimizer.zero_grad()
 
+                # Update batch progress bar with current metrics
+                batch_pbar.set_postfix({
+                    'reg_loss': f'{epoch_reg_loss.getAvg():.4f}',
+                    'mae': f'{epoch_mae.getAvg():.2f}',
+                    'mse': f'{np.sqrt(epoch_mse.getAvg()):.2f}'
+                })
+
+        batch_pbar.close()
+        
         logging.info(
             'Epoch {} Train, reg:{:.4f}, RRC_stage1:{:.4f}, RRC_stage2:{:.4f}, mae:{:.2f}, mse:{:.2f}, Cost: {:.1f} sec '
             .format(self.epoch, epoch_reg_loss.getAvg(), epoch_RRC1_loss.getAvg(), epoch_RRC2_loss.getAvg(), epoch_mae.getAvg(),
                     np.sqrt(epoch_mse.getAvg()), (time.time() - epoch_start)))
 
-        if self.epoch % 5 == 0:
+        if self.epoch % 2 == 0:
             model_state_dict = self.model.state_dict()
             save_path = os.path.join(self.save_dir, "{}_ckpt.tar".format(self.epoch))
             torch.save({
@@ -168,7 +204,14 @@ class Reg_Trainer(Trainer):
         epoch_start = time.time()
         self.model.set_eval()
         epoch_res = []
-        for inputs, gt_counts, captions, prompt_attn_mask, name in self.dataloaders['val']:
+        
+        # Create validation progress bar
+        val_pbar = tqdm(self.dataloaders['val'], 
+                       desc=f"Epoch {self.epoch} Validation", 
+                       position=1, 
+                       leave=False)
+        
+        for inputs, gt_counts, captions, prompt_attn_mask, name in val_pbar:
             inputs = inputs.to(self.device)
             gt_attn_mask = prompt_attn_mask.to(self.device).unsqueeze(2).unsqueeze(3)
             cropped_imgs, num_h, num_w = extract_patches(inputs, patch_size=self.args.crop_size,
@@ -186,6 +229,8 @@ class Reg_Trainer(Trainer):
                 res = gt_counts[0].item() - torch.sum(results).item() / 60
                 epoch_res.append(res)
 
+        val_pbar.close()
+        
         epoch_res = np.array(epoch_res)
         mse = np.sqrt(np.mean(np.square(epoch_res)))
         mae = np.mean(np.abs(epoch_res))
@@ -207,7 +252,14 @@ class Reg_Trainer(Trainer):
         epoch_start = time.time()
         self.model.set_eval()
         epoch_res = []
-        for inputs, gt_counts, captions, prompt_attn_mask, name in self.dataloaders['test']:
+        
+        # Create test progress bar
+        test_pbar = tqdm(self.dataloaders['test'], 
+                        desc=f"Epoch {self.epoch} Testing", 
+                        position=1, 
+                        leave=False)
+        
+        for inputs, gt_counts, captions, prompt_attn_mask, name in test_pbar:
             inputs = inputs.to(self.device)
             gt_attn_mask = prompt_attn_mask.to(self.device).unsqueeze(2).unsqueeze(3)
             cropped_imgs, num_h, num_w = extract_patches(inputs, patch_size=self.args.crop_size,
@@ -225,6 +277,8 @@ class Reg_Trainer(Trainer):
                 res = gt_counts[0].item() - torch.sum(results).item() / 60
                 epoch_res.append(res)
 
+        test_pbar.close()
+        
         epoch_res = np.array(epoch_res)
         mse = np.sqrt(np.mean(np.square(epoch_res)))
         mae = np.mean(np.abs(epoch_res))

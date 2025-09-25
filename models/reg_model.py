@@ -29,12 +29,58 @@ class Count(nn.Module):
         config = OmegaConf.load(f'{config}')
         sd_model = load_model_from_config(config, f"{sd_path}")
         self.vae = sd_model.first_stage_model
-        self.unet = UNetWrapper(sd_model.model, **unet_config)
+        # sd_model may be wrapped (e.g., DiffusionWrapper) or may contain the diffusion model at
+        # sd_model.model.diffusion_model. Choose the actual UNet module robustly.
+        unet_module = None
+        # Case 1: checkpoint returned a wrapper that stores the diffusion model as .diffusion_model
+        if hasattr(sd_model, 'diffusion_model'):
+            unet_module = sd_model.diffusion_model
+        # Case 2: sd_model.model may itself be a wrapper containing .diffusion_model
+        elif hasattr(sd_model, 'model') and hasattr(sd_model.model, 'diffusion_model'):
+            unet_module = sd_model.model.diffusion_model
+        # Case 3: fallback to sd_model.model (original code path)
+        elif hasattr(sd_model, 'model'):
+            unet_module = sd_model.model
 
+        if unet_module is None:
+            raise RuntimeError('Could not locate UNet module inside loaded sd_model (checked diffusion_model and model)')
+
+        # For this user's machine, hardcode 4-GPU partitioning across cuda:0..3
+        devices = unet_config.get('devices') if isinstance(unet_config, dict) and 'devices' in unet_config else ['cuda:0','cuda:1','cuda:2','cuda:3']
+        self.unet = UNetWrapper(unet_module, **unet_config, devices=devices) if isinstance(unet_config, dict) else UNetWrapper(unet_module, devices=devices)
+
+        # Move VAE and CLIP to GPU:0 (the primary device) so their parameters live on the same device
+        # as input tensors when encoding. UNetWrapper handles distributing UNet submodules across
+        # multiple GPUs (device1/device2). Place the Decoder onto UNet's device1 so it can accept
+        # the feature maps returned by UNet without device mismatch.
         self.clip = sd_model.cond_stage_model
-        del self.vae.decoder
+        # delete VAE decoder if present to save memory (original behavior)
+        try:
+            del self.vae.decoder
+        except Exception:
+            pass
+
+        # Move VAE and CLIP to primary GPU (cuda:0) when available
+        if torch.cuda.is_available():
+            device0 = torch.device('cuda:0')
+            try:
+                self.vae.to(device0)
+            except Exception:
+                pass
+            try:
+                self.clip.to(device0)
+            except Exception:
+                pass
+
         self.set_frozen_parameters()
-        self.decoder = Decoder(in_dim=[320, 640, 1280, 1280], out_dim=256)
+
+        # Place decoder onto a device where some of the UNet output blocks live.
+        # We'll choose the device that the last output block was placed on to receive the outputs.
+        try:
+            last_output_device = self.unet.devices[-1]
+        except Exception:
+            last_output_device = self.unet.device1
+        self.decoder = Decoder(in_dim=[320, 640, 1280, 1280], out_dim=256).to(last_output_device)
 
     def set_frozen_parameters(self):
         for param in self.vae.parameters():
@@ -69,6 +115,17 @@ class Count(nn.Module):
     def forward(self, x, prompt, prompt_attn_mask):
         outs, text_feat = self.extract_feat(x, prompt)
         img_feat, attn12, attn24, attn48 = outs
+        # Ensure attention maps, masks and text features live on the same device
+        # to avoid device mismatch during element-wise ops.
+        attn_device = attn12.device if attn12 is not None else self.unet.device1
+        try:
+            prompt_attn_mask = prompt_attn_mask.to(attn_device)
+        except Exception:
+            prompt_attn_mask = prompt_attn_mask.cuda(attn_device.index) if torch.cuda.is_available() else prompt_attn_mask
+        try:
+            text_feat = text_feat.to(attn_device)
+        except Exception:
+            pass
         attn12 = nn.Upsample(scale_factor=4, mode='bilinear', align_corners=False)(attn12)
         attn24 = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=False)(attn24)
         attn12 = (attn12 * prompt_attn_mask).sum(dim=1, keepdims=True) / prompt_attn_mask.sum(dim=1, keepdims=True)
@@ -77,6 +134,64 @@ class Count(nn.Module):
 
         fused_attn = 0.1 * minmax_norm(attn48) + 0.3 * minmax_norm(attn24) + 0.6 * minmax_norm(attn12)
         text_feat = (text_feat * prompt_attn_mask.squeeze(3)).sum(dim=1) / prompt_attn_mask.squeeze(3).sum(dim=1) # B, 768
+        # Ensure decoder inputs live on the same device as the decoder module.
+        try:
+            decoder_params = next(self.decoder.parameters())
+            decoder_device = decoder_params.device
+        except StopIteration:
+            decoder_device = self.unet.device1
+
+        # Move image feature maps to decoder device
+        img_feat = [f.to(decoder_device) for f in img_feat]
+        try:
+            text_feat = text_feat.to(decoder_device)
+        except Exception:
+            pass
+
+        den_map, sim_x2, sim_x1 = self.decoder(img_feat, text_feat)
+        return den_map, sim_x2, sim_x1, fused_attn.float().detach()
+
+    def forward_with_encoded_text(self, x, text_feat, prompt_attn_mask):
+        """Forward method that takes pre-encoded text features (for DataParallel)"""
+        with torch.no_grad():
+            latents = self.vae.encode(x)
+        latents = latents.mode().detach()
+        
+        t = torch.zeros((x.shape[0],), device=x.device).long()
+        outs = self.unet(latents, t, c_crossattn=[text_feat])
+        img_feat, attn12, attn24, attn48 = outs
+        # Move masks and text features to attention tensors' device to avoid
+        # cross-device operations when combining attention maps with masks.
+        attn_device = attn12.device if attn12 is not None else self.unet.device1
+        try:
+            prompt_attn_mask = prompt_attn_mask.to(attn_device)
+        except Exception:
+            prompt_attn_mask = prompt_attn_mask.cuda(attn_device.index) if torch.cuda.is_available() else prompt_attn_mask
+        try:
+            text_feat = text_feat.to(attn_device)
+        except Exception:
+            pass
+
+        attn12 = nn.Upsample(scale_factor=4, mode='bilinear', align_corners=False)(attn12)
+        attn24 = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=False)(attn24)
+        attn12 = (attn12 * prompt_attn_mask).sum(dim=1, keepdims=True) / prompt_attn_mask.sum(dim=1, keepdims=True)
+        attn24 = (attn24 * prompt_attn_mask).sum(dim=1, keepdims=True) / prompt_attn_mask.sum(dim=1, keepdims=True)
+        attn48 = (attn48 * prompt_attn_mask).sum(dim=1, keepdims=True) / prompt_attn_mask.sum(dim=1, keepdims=True)
+
+        fused_attn = 0.1 * minmax_norm(attn48) + 0.3 * minmax_norm(attn24) + 0.6 * minmax_norm(attn12)
+        text_feat = (text_feat * prompt_attn_mask.squeeze(3)).sum(dim=1) / prompt_attn_mask.squeeze(3).sum(dim=1) # B, 768
+        try:
+            decoder_params = next(self.decoder.parameters())
+            decoder_device = decoder_params.device
+        except StopIteration:
+            decoder_device = self.unet.device1
+
+        img_feat = [f.to(decoder_device) for f in img_feat]
+        try:
+            text_feat = text_feat.to(decoder_device)
+        except Exception:
+            pass
+
         den_map, sim_x2, sim_x1 = self.decoder(img_feat, text_feat)
         return den_map, sim_x2, sim_x1, fused_attn.float().detach()
 
