@@ -2,6 +2,7 @@
 data/
 dataset/
 datasets/
+src/taming-transformers
 
 # Model files
 *.pt
