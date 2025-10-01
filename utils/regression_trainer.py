@@ -238,20 +238,26 @@ def get_normalized_map(density_map):
     mu_normed = density_map / (mu_sum + 1e-6)
     return mu_normed
 
+def sigmoid(x):
+    return 1 / (1 + np.exp(-x))
 
 def get_reg_loss(pred, gt, threshold, level=3, window_size=3):
-    mask = gt > threshold
+    # mask = gt > threshold
+    mask = sigmoid((gt / threshold) - 1)
     loss_ssim = cal_avg_ms_ssim(pred * mask, gt * mask, level=level,
                                 window_size=window_size)
     mu_normed = get_normalized_map(pred)
     gt_mu_normed = get_normalized_map(gt)
-    tv_loss = (nn.L1Loss(reduction='none')(mu_normed, gt_mu_normed).sum(1).sum(1).sum(1)).mean(0)
+    # tv_loss = (nn.L1Loss(reduction='none')(mu_normed, gt_mu_normed).sum(1).sum(1).sum(1)).mean(0)
+    tv_loss = (nn.MSELoss(reduction='none')(mu_normed, gt_mu_normed).sum(1).sum(1).sum(1)).mean(0)
     return loss_ssim + 0.1 * tv_loss
 
 
 def RRC_loss(simi, ambiguous_negative_map, positive_map):
     pos = (1 - simi) * positive_map
-    neg = torch.clamp(simi, min=0) * (ambiguous_negative_map == 0) * (positive_map == 0)
+    # neg = torch.clamp(simi, min=0) * (ambiguous_negative_map == 0) * (positive_map == 0)
+    alpha = 0.3 # novel
+    neg = (torch.clamp(simi, min=0) + alpha * torch.pow(torch.clamp(simi, min=0), 2)) * (ambiguous_negative_map == 0) * (positive_map == 0)
 
     pos_num = positive_map.flatten(1).sum(dim=1)
     neg_num = ((ambiguous_negative_map == 0) * (positive_map == 0)).flatten(1).sum(dim=1)
